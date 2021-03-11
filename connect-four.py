@@ -1,6 +1,10 @@
+import tkinter as tk
+from tkinter.messagebox import showinfo,showerror,showwarning
+
 width = 7
 height = 6
-
+player1_turn = True
+final_score = False
 board = [[None for i in range(height)]for h in range(width)]
 
 """
@@ -24,11 +28,6 @@ def recursive_gravity(array, arr_index=0):
             return -1
     except IndexError:
         return -1
-
-def add_chip(col,chip):
-    position = recursive_gravity(board[col])
-    if(position >= 0):
-        board[col][position] = chip
 
 
 
@@ -60,9 +59,9 @@ def horizontal_win():
 
     def going_through(row,col,count=0):
         if(count<2):
-            return (board[col+count][row] == board[col+count+1][row] and board[col+count][row] != None) and going_through(row,col,count+1)
+            return ((board[col+count][row] == board[col+count+1][row] and board[col+count][row] != None) and going_through(row,col,count+1))
         else:
-            return board[col+count][row] == board[col+count+1][row]
+            return (board[col+count][row] == board[col+count+1][row])
 
     for row in range(height):
         for column in range(width-3):
@@ -103,10 +102,62 @@ def SW_diagonal_win():
     return win_result
 
 
-add_chip(0,"x")
 
 
+window = tk.Tk()
+window.title("Connect 4")
 
-final_score = vertical_win() or horizontal_win() or SE_diagonal_win() or SW_diagonal_win()
+def drop_chip(col):
+    global player1_turn
+    position = recursive_gravity(board[col])
 
-board
+    if(player1_turn):
+        chip = "x"
+        color = "red"
+    else:
+        chip = "o"
+        color = "yellow"
+
+    if(position >= 0):
+        board[col][position] = chip
+        slots[col][position]["background"] = color
+        player1_turn = not player1_turn
+    else:
+        showwarning('Cannot Place Chip','Column already full!\n\nTry somewhere else')
+
+    final_score = vertical_win() or horizontal_win() or SE_diagonal_win() or SW_diagonal_win()
+    if(final_score):
+        showinfo("Winner!",f"{color} wins!")
+
+    globals()['final_score'] = True
+
+choose_area = tk.Frame()
+choose_area.pack()
+
+play_area = tk.Frame()
+play_area.pack(fill=tk.BOTH)
+
+for cols in range(7):
+    choice = tk.Button(
+        master = choose_area,
+        text = "Drop",
+        command = lambda arg1=cols: drop_chip(arg1)
+    )
+    choice.grid(column=cols,row=0)
+
+slots = [[None for i in range(height)]for h in range(width)]
+for row in range(6):
+    for col in range(7):
+        slots[col][row] = tk.Frame(
+            master=play_area,
+            relief=tk.RAISED,
+            borderwidth=1,
+            width = 62,
+            height = 62
+        )
+        slots[col][row].grid(row=row, column=col, padx=3, pady=3)
+        #grid_label = tk.Label(master=slot) #text=f"Row {row}\nColumn {col}")
+        #grid_label.pack()
+
+
+window.mainloop()
