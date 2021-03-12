@@ -1,25 +1,21 @@
 import tkinter as tk
-from tkinter.messagebox import showinfo,showerror,showwarning
+from tkinter.messagebox import showinfo,showwarning
 
+#Width: how many cells wide the board is
+#Height: how many cells tall the board is
+#Connect: How many chips you need in a row to win
 width = 7
 height = 6
+connect = 4
 player1_turn = True
-final_score = False
 board = [[None for i in range(height)]for h in range(width)]
 
-"""
-# board[COL][ROW]
-board[3][0] = "x"
-board[2][1] = "x"
-board[1][2] = "x"
-board[0][3] = "x"
-"""
+"""board[COL][ROW]"""
+
 
 """ This recursive function will give you the index of the lowest
     available spot the connect4 piece can drop to. It will return
     -1 if there are no spots left   """
-
-
 def recursive_gravity(array, arr_index=0):
     try:
         if(array[arr_index] == None):
@@ -38,9 +34,10 @@ def vertical_win():
     # Poorly named, but this recursively goes through 4 rows to see if they match by
     # comparing one row to the next and aggregating the results through boolean AND logic
     def going_through(row, col, count=0):
-        # count < 2 because that's 0==1, 1==2, and else takes care of 2==3
+        # count < (connect-2) because else takes care of the final 2 compares
+        #   for connect = 4 that's 0==1, 1==2, and else takes care of 2==3
         # starting at 1, that'd be 1==2, 2==3, and else takes card of 3==4
-        if(count < 2):
+        if(count < (connect-2)):
             return ((board[col][row+count] == board[col][row+count+1] and board[col][row+count] != None) and going_through(row, col, count+1))
         else:
             return (board[col][row+count] == board[col][row+count+1])
@@ -58,7 +55,7 @@ def horizontal_win():
     win_result = False
 
     def going_through(row,col,count=0):
-        if(count<2):
+        if(count<(connect-2)):
             return ((board[col+count][row] == board[col+count+1][row] and board[col+count][row] != None) and going_through(row,col,count+1))
         else:
             return (board[col+count][row] == board[col+count+1][row])
@@ -74,7 +71,7 @@ def SE_diagonal_win():
     win_result = False
 
     def going_through(row,col,count=0):
-        if(count<2):
+        if(count<(connect-2)):
             return (board[col+count][row+count] == board[col+count+1][row+count+1] and board[col+count][row+count] != None) and going_through(row,col,count+1)
         else:
             return board[col+count][row+count] == board[col+count+1][row+count+1]
@@ -90,7 +87,7 @@ def SW_diagonal_win():
     win_result = False
 
     def going_through(row,col,count=0):
-        if(count<2):
+        if(count<(connect-2)):
             return (board[col-count][row+count] == board[col-count-1][row+count+1] and board[col-count][row+count] != None) and going_through(row,col,count+1)
         else:
             return board[col-count][row+count] == board[col-count-1][row+count+1]
