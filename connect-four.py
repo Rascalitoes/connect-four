@@ -27,42 +27,47 @@ def recursive_gravity(array, arr_index=0):
 
 
 
-def vertical_win():
+def vertical_win(last_placement):
 
     win_result = False
+    """
+    #Vertical win has the unique clause that a chip must at least be
+    #4 units high to even consider the possibility of a win scenario
+    if((height - last_placement[1])  >= connect):
+        win_result = False
+    else:
+        win_result = False
 
-    # Poorly named, but this recursively goes through 4 rows to see if they match by
-    # comparing one row to the next and aggregating the results through boolean AND logic
-    def going_through(row, col, count=0):
-        # count < (connect-2) because else takes care of the final 2 compares
-        #   for connect = 4 that's 0==1, 1==2, and else takes care of 2==3
-        # starting at 1, that'd be 1==2, 2==3, and else takes card of 3==4
-        if(count < (connect-2)):
-            return ((board[col][row+count] == board[col][row+count+1] and board[col][row+count] != None) and going_through(row, col, count+1))
-        else:
-            return (board[col][row+count] == board[col][row+count+1])
-
-
-    # Since going_through() goes through the next 4 rows, this loop stops 4 short of total width
-    for column in range(width):
-        for row in range(height-3):
-            win_result = win_result or going_through(row, column)
+    #def going_through(row,col,count=0):
+        
+    """
 
     return win_result
 
-def horizontal_win():
+def horizontal_win(last_placement):
 
     win_result = False
 
-    def going_through(row,col,count=0):
-        if(count<(connect-2)):
-            return ((board[col+count][row] == board[col+count+1][row] and board[col+count][row] != None) and going_through(row,col,count+1))
+    """Three checks are being made here
+        1.  Checking to see if 4-in-a-row (or custom connect size) have been compared yet.
+            In a normal game, 3 comparisons must be made (0==1,1==2,2==3) to determine if 
+            this is a winning row. If 3 comparisons have been made, then we know that it's
+            a winning row because we've met the criteria to get here. (More info in next point)
+        2.  Checking to see if the current chip is equal to the next chip. If yes, then continue
+            recursion. If no, go to the else statement, and return False, getting out of the
+            function.
+    """
+    def win_check(col,row,count=0):
+        if(count > (connect-2)):
+            return True
+        elif(board[col+count][row] == board[col+count+1][row]):
+            return True and win_check(col,row,count+1)
         else:
-            return (board[col+count][row] == board[col+count+1][row])
-
-    for row in range(height):
-        for column in range(width-3):
-            win_result = win_result or going_through(row,column)
+            return False
+    
+    for column in range(max(last_placement[0]-connect+1,0),min(last_placement[0]+1,width-3)):
+        print(column)
+        win_result = win_result or win_check(column,last_placement[1])
     
     return win_result
 
@@ -122,7 +127,7 @@ def drop_chip(col):
     else:
         showwarning('Cannot Place Chip','Column already full!\n\nTry somewhere else')
 
-    final_score = vertical_win() or horizontal_win() or SE_diagonal_win() or SW_diagonal_win()
+    final_score = vertical_win([col,position]) or horizontal_win([col,position]) or SE_diagonal_win() or SW_diagonal_win()
     if(final_score):
         showinfo("Winner!",f"{color} wins!")
 
