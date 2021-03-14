@@ -30,17 +30,21 @@ def recursive_gravity(array, arr_index=0):
 def vertical_win(last_placement):
 
     win_result = False
-    """
+    
+    def win_check(col,row,count=0):
+        if(count > (connect-2)):
+            return True
+        elif(board[col][row+count] == board[col][row+count+1]):
+            return True and win_check(col,row,count+1)
+        else:
+            return False
+
     #Vertical win has the unique clause that a chip must at least be
     #4 units high to even consider the possibility of a win scenario
-    if((height - last_placement[1])  >= connect):
+    if((height - last_placement[1])  < connect):
         win_result = False
     else:
-        win_result = False
-
-    #def going_through(row,col,count=0):
-        
-    """
+        win_result = win_check(last_placement[0],last_placement[1])
 
     return win_result
 
@@ -66,7 +70,6 @@ def horizontal_win(last_placement):
             return False
     
     for column in range(max(last_placement[0]-connect+1,0),min(last_placement[0]+1,width-3)):
-        print(column)
         win_result = win_result or win_check(column,last_placement[1])
     
     return win_result
