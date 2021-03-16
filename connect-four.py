@@ -15,7 +15,7 @@ board = [[None for i in range(height)]for h in range(width)]
 
 """ This recursive function will give you the index of the lowest
     available spot the connect4 piece can drop to. It will return
-    -1 if there are no spots left   """
+    -1 if there are no spots left                                 """
 def recursive_gravity(array, arr_index=0):
     try:
         if(array[arr_index] == None):
@@ -86,25 +86,32 @@ def NE_diagonal_win(coord):
         else:
             return False
 
+    #the if statement checks to see if the coordinates are in a place where there are
+    #at least 4 places for chips in a row. Not 100% efficient, but good enough
     for i in range(connect):
-        if(coord[0]-i <= width-connect and coord[0] >= 0 and coord[1]+i >= connect-1 and coord[1] < height):
-            win_result = win_result or win_check(coord[0],coord[1])
+        if(coord[0]-i <= width-connect and coord[0]-i >= 0 and coord[1]+i >= connect-1 and coord[1]+i < height):
+            win_result = win_result or win_check(coord[0]-i,coord[1]+i)
     
     return win_result
 
-def SW_diagonal_win():
+def NW_diagonal_win(coord):
 
     win_result = False
 
-    def going_through(row,col,count=0):
-        if(count<(connect-2)):
-            return (board[col-count][row+count] == board[col-count-1][row+count+1] and board[col-count][row+count] != None) and going_through(row,col,count+1)
+    def win_check(col,row,count=0):
+        if(count > (connect-2)):
+            return True
+        elif(board[col-count][row-count] == board[col-count-1][row-count-1]):
+            return True and win_check(col,row,count+1)
         else:
-            return board[col-count][row+count] == board[col-count-1][row+count+1]
+            return False
 
-    for row in range(height-3):
-        for column in range(width-3):
-            win_result = win_result or going_through(row,width-column-1)
+    #the if statement checks to see if the coordinates are in a place where there are
+    #at least 4 places for chips in a row. Not 100% efficient, but good enough
+    for i in range(connect):
+        if(coord[0]+i >= connect-1 and coord[0]+i < width and coord[1]+i >= connect-1 and coord[1]+i < height):
+            print(i)
+            win_result = win_result or win_check(coord[0]+i,coord[1]+i)
 
     return win_result
 
@@ -132,7 +139,7 @@ def drop_chip(col):
     else:
         showwarning('Cannot Place Chip','Column already full!\n\nTry somewhere else')
 
-    final_score = vertical_win([col,position]) or horizontal_win([col,position]) or NE_diagonal_win([col,position])
+    final_score = vertical_win([col,position]) or horizontal_win([col,position]) or NE_diagonal_win([col,position]) or NW_diagonal_win([col,position])
     if(final_score):
         showinfo("Winner!",f"{color} wins!")
 
