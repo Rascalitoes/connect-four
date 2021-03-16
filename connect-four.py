@@ -27,7 +27,7 @@ def recursive_gravity(array, arr_index=0):
 
 
 
-def vertical_win(last_placement):
+def vertical_win(coord):
 
     win_result = False
     
@@ -41,15 +41,15 @@ def vertical_win(last_placement):
 
     #Vertical win has the unique clause that a chip must at least be
     #4 units high to even consider the possibility of a win scenario
-    if((height - last_placement[1])  < connect):
+    if((height - coord[1])  < connect):
         win_result = False
     else:
-        win_result = win_check(last_placement[0],last_placement[1])
+        win_result = win_check(coord[0],coord[1])
 
     return win_result
 
-def horizontal_win(last_placement):
-
+def horizontal_win(coord):
+    #coord is the coords of the most recent chip placement
     win_result = False
 
     """Three checks are being made here
@@ -69,24 +69,26 @@ def horizontal_win(last_placement):
         else:
             return False
     
-    for column in range(max(last_placement[0]-connect+1,0),min(last_placement[0]+1,width-3)):
-        win_result = win_result or win_check(column,last_placement[1])
+    for column in range(max(coord[0]-connect+1,0),min(coord[0]+1,width-3)):
+        win_result = win_result or win_check(column,coord[1])
     
     return win_result
 
-def SE_diagonal_win():
+def NE_diagonal_win(coord):
     
     win_result = False
 
-    def going_through(row,col,count=0):
-        if(count<(connect-2)):
-            return (board[col+count][row+count] == board[col+count+1][row+count+1] and board[col+count][row+count] != None) and going_through(row,col,count+1)
+    def win_check(col,row,count=0):
+        if(count > (connect-2)):
+            return True
+        elif(board[col+count][row-count] == board[col+count+1][row-count-1]):
+            return True and win_check(col,row,count+1)
         else:
-            return board[col+count][row+count] == board[col+count+1][row+count+1]
+            return False
 
-    for row in range(height-3):
-        for column in range(width-3):
-            win_result = win_result or going_through(row,column)
+    for i in range(connect):
+        if(coord[0]-i <= width-connect and coord[0] >= 0 and coord[1]+i >= connect-1 and coord[1] < height):
+            win_result = win_result or win_check(coord[0],coord[1])
     
     return win_result
 
@@ -130,7 +132,7 @@ def drop_chip(col):
     else:
         showwarning('Cannot Place Chip','Column already full!\n\nTry somewhere else')
 
-    final_score = vertical_win([col,position]) or horizontal_win([col,position]) or SE_diagonal_win() or SW_diagonal_win()
+    final_score = vertical_win([col,position]) or horizontal_win([col,position]) or NE_diagonal_win([col,position])
     if(final_score):
         showinfo("Winner!",f"{color} wins!")
 
